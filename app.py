@@ -2,6 +2,8 @@ import sqlite3
 import matplotlib.pyplot as plt
 import streamlit as st
 import pandas as pd
+import seaborn as sns
+
 
 connection = sqlite3.connect("Köksglädje.db")
 
@@ -40,20 +42,26 @@ st.dataframe(sales_total_df)
 
 st.bar_chart(sales_total_df,x="Kategori", y="Sammanlagd Försäljningsumma")
 
+#best in each category
 st.subheader("Högst säljande butik i varje kategori")
 st.dataframe(best_in_category_df)
 
 st.bar_chart(best_in_category_df,x="Kategori", y="Sammanlagd Försäljningsumma")
 
+#stores per categori
 st.subheader("Butiksprestande per kategori")
 
-st.bar_chart(store_sales_df, x="Kategori", y="Sammanlagd Försäljningsumma", stack=False)
+figbar, axbar = plt.subplots(figsize=(12, 8))
+sns.barplot(store_sales_df, x="Kategori", y="Sammanlagd Försäljningsumma", hue="Butik", ax=axbar)
+st.pyplot(figbar)
 
+#selector for piechart
 st_category_select = store_sales_df.drop_duplicates(subset=['Kategori'])
 st_category = st.selectbox(label='Välj kategori',options=st_category_select['Kategori'])
 
 stores_in_category_df = store_sales_df[store_sales_df['Kategori'] == st_category]
 
+#piechart
 figsic, axsic = plt.subplots()
 axsic.pie(stores_in_category_df['Sammanlagd Försäljningsumma'],
           labels=stores_in_category_df['Butik'],
@@ -65,12 +73,14 @@ st.pyplot(figsic)
 
 st.subheader("Kategoriprestanda per butik")
 
+#selector for piechart
 st_store_select = store_sales_df.drop_duplicates(subset=['Butik'])
 st_store = st.selectbox(label='Välj butik',
                         options=st_store_select['Butik'])
 
 category_in_stores_df = store_sales_df[store_sales_df['Butik'] == st_store]
 
+#piechart
 figcis, axcis = plt.subplots()
 axcis.pie(category_in_stores_df['Sammanlagd Försäljningsumma'],
           labels=category_in_stores_df['Kategori'],
