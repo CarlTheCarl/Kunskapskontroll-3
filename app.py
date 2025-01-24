@@ -6,6 +6,7 @@ import seaborn as sns
 
 
 connection = sqlite3.connect("Köksglädje.db")
+palette_color = sns.color_palette('bright')#declares the palette colour for the piecharts using seaborn
 
 sales_total_query = '''SELECT Products.CategoryName as Kategori, SUM(PriceAtPurchase) as "Sammanlagd Försäljningsumma"
 FROM TransactionDetails
@@ -40,20 +41,32 @@ st.header("Analys av försäljning av köksprylar och föremål")
 st.subheader("Total försäjning per kategori")
 st.dataframe(sales_total_df)
 
-st.bar_chart(sales_total_df,x="Kategori", y="Sammanlagd Försäljningsumma")
+figbarts, axbarts = plt.subplots()
+sns.barplot(sales_total_df.reset_index(),
+            x="Kategori", y="Sammanlagd Försäljningsumma",
+            ax=axbarts, errorbar=None)
+plt.xticks(rotation=45)
+st.pyplot(figbarts)
 
 #best in each category
 st.subheader("Högst säljande butik i varje kategori")
 st.dataframe(best_in_category_df)
 
-st.bar_chart(best_in_category_df,x="Kategori", y="Sammanlagd Försäljningsumma")
+figbarbc, axbarbc = plt.subplots()
+sns.barplot(best_in_category_df.reset_index(),
+            x="Kategori", y="Sammanlagd Försäljningsumma",
+            ax=axbarbc, errorbar=None)
+plt.xticks(rotation=45)
+st.pyplot(figbarbc)
 
 #stores per categori
 st.subheader("Butiksprestande per kategori")
 
-figbar, axbar = plt.subplots(figsize=(12, 8))
-sns.barplot(store_sales_df, x="Kategori", y="Sammanlagd Försäljningsumma", hue="Butik", ax=axbar)
-st.pyplot(figbar)
+figbarsic, axbarsic = plt.subplots(figsize=(12, 8))
+sns.barplot(store_sales_df.reset_index(),
+            x="Kategori", y="Sammanlagd Försäljningsumma",
+            hue="Butik", ax=axbarsic)
+st.pyplot(figbarsic)
 
 #selector for piechart
 st_category_select = store_sales_df.drop_duplicates(subset=['Kategori'])
@@ -65,9 +78,12 @@ stores_in_category_df = store_sales_df[store_sales_df['Kategori'] == st_category
 figsic, axsic = plt.subplots()
 axsic.pie(stores_in_category_df['Sammanlagd Försäljningsumma'],
           labels=stores_in_category_df['Butik'],
+          colors=palette_color,
           autopct='%1.1f%%',
           startangle=90)
 axsic.axis('equal')
+
+plt.show()  
 
 st.pyplot(figsic)
 
@@ -84,6 +100,7 @@ category_in_stores_df = store_sales_df[store_sales_df['Butik'] == st_store]
 figcis, axcis = plt.subplots()
 axcis.pie(category_in_stores_df['Sammanlagd Försäljningsumma'],
           labels=category_in_stores_df['Kategori'],
+          colors=palette_color,
           autopct='%1.1f%%',
           startangle=90)
 axcis.axis('equal')
