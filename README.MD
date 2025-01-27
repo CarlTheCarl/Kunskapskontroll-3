@@ -17,7 +17,8 @@ Redovisning på all inkomst från Köksglädje
 Listed versions were used during the devolopment although previous versions might still work
 
 ### Installaton  
-Download the files in a single folder
+- Download zip folder  
+- Unzip
 
 ### Usage  
 streamlit run app.py
