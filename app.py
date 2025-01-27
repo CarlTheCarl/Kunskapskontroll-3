@@ -61,6 +61,7 @@ sns.barplot(best_in_category_df.reset_index(),
 plt.xticks(rotation=45)
 st.pyplot(figbarbc)
 
+
 #--------------------stores per categori--------------------
 st.subheader("Butiksprestande per kategori")
 
@@ -82,17 +83,16 @@ stores_in_category_df['Procent'] = (stores_in_category_df['Sammanlagd Försäljn
 #--------------------barchart--------------------
 figsic, axsic = plt.subplots()
 sns.barplot(stores_in_category_df.reset_index(),
-            x="Butik",
-            y="Procent",
+            x="Procent",
+            y="Butik",
             ax=axsic,
             errorbar=None,
             palette="bright")
-plt.xticks(rotation=90)
-axsic.set_yticklabels([f'{x:.0f}%' for x in axsic.get_yticks()]) 
+axsic.set_xticklabels([f'{x:.0f}%' for x in axsic.get_xticks()]) 
 
 st.pyplot(figsic)
 
-#--------------------category break--------------------
+#--------------------categori per store--------------------
 
 st.subheader("Kategoriprestanda per butik")
 
@@ -115,7 +115,7 @@ sns.barplot(category_in_stores_df.reset_index(),
             ax=axcis,
             errorbar=None,
             palette="bright")
-plt.xticks(rotation=90)
+plt.xticks(rotation=45)
 axcis.set_yticklabels([f'{x:.0f}%' for x in axcis.get_yticks()]) 
 
 st.pyplot(figcis)
