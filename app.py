@@ -6,7 +6,7 @@ import sqlite3
 
 
 connection = sqlite3.connect("Köksglädje.db")
-palette_color = sns.color_palette('bright')#declares the palette colour for the piecharts using seaborn
+palette_color = sns.color_palette("bright")#declares the palette colour for the piecharts using seaborn
 
 sales_total_query = '''SELECT Products.CategoryName as Kategori, SUM(PriceAtPurchase) as "Sammanlagd Försäljningsumma"
 FROM TransactionDetails
@@ -44,22 +44,24 @@ st.dataframe(sales_total_df)
 figbarts, axbarts = plt.subplots()
 sns.barplot(sales_total_df.reset_index(),
             x="Kategori", y="Sammanlagd Försäljningsumma",
-            ax=axbarts, errorbar=None)
+            ax=axbarts, errorbar=None,
+            palette="bright")
 plt.xticks(rotation=45)
 st.pyplot(figbarts)
 
-#best in each category
+#--------------------best in each category--------------------
 st.subheader("Högst säljande butik i varje kategori")
 st.dataframe(best_in_category_df)
 
 figbarbc, axbarbc = plt.subplots()
 sns.barplot(best_in_category_df.reset_index(),
             x="Kategori", y="Sammanlagd Försäljningsumma",
-            ax=axbarbc, errorbar=None)
+            ax=axbarbc, errorbar=None,
+            palette="bright")
 plt.xticks(rotation=45)
 st.pyplot(figbarbc)
 
-#stores per categori
+#--------------------stores per categori--------------------
 st.subheader("Butiksprestande per kategori")
 
 figbarsic, axbarsic = plt.subplots(figsize=(12, 8))
@@ -68,41 +70,52 @@ sns.barplot(store_sales_df.reset_index(),
             hue="Butik", ax=axbarsic)
 st.pyplot(figbarsic)
 
-#selector for piechart
+#--------------------selector for barchart--------------------
 st_category_select = store_sales_df.drop_duplicates(subset=['Kategori'])
+st_category_select.sort_values('Kategori', inplace=True)
 st_category = st.selectbox(label='Välj kategori',options=st_category_select['Kategori'])
 
 stores_in_category_df = store_sales_df[store_sales_df['Kategori'] == st_category]
+stores_in_category_df.sort_values('Butik', inplace=True)
+stores_in_category_df['Procent'] = (stores_in_category_df['Sammanlagd Försäljningsumma'] / sum(stores_in_category_df['Sammanlagd Försäljningsumma'])) * 100
 
-#piechart
+#--------------------barchart--------------------
 figsic, axsic = plt.subplots()
-axsic.pie(stores_in_category_df['Sammanlagd Försäljningsumma'],
-          labels=stores_in_category_df['Butik'],
-          colors=palette_color,
-          autopct='%1.1f%%',
-          startangle=90)
-axsic.axis('equal')
-
-plt.show()  
+sns.barplot(stores_in_category_df.reset_index(),
+            x="Butik",
+            y="Procent",
+            ax=axsic,
+            errorbar=None,
+            palette="bright")
+plt.xticks(rotation=90)
+axsic.set_yticklabels([f'{x:.0f}%' for x in axsic.get_yticks()]) 
 
 st.pyplot(figsic)
 
+#--------------------category break--------------------
+
 st.subheader("Kategoriprestanda per butik")
 
-#selector for piechart
+#--------------------selector for barchart--------------------
 st_store_select = store_sales_df.drop_duplicates(subset=['Butik'])
+st_store_select.sort_values('Butik', inplace=True)
 st_store = st.selectbox(label='Välj butik',
                         options=st_store_select['Butik'])
 
 category_in_stores_df = store_sales_df[store_sales_df['Butik'] == st_store]
+category_in_stores_df.sort_values('Kategori', inplace=True)
+category_in_stores_df['Procent'] = (category_in_stores_df['Sammanlagd Försäljningsumma'] / sum(category_in_stores_df['Sammanlagd Försäljningsumma'])) * 100
 
-#piechart
+
+#--------------------barchart--------------------
 figcis, axcis = plt.subplots()
-axcis.pie(category_in_stores_df['Sammanlagd Försäljningsumma'],
-          labels=category_in_stores_df['Kategori'],
-          colors=palette_color,
-          autopct='%1.1f%%',
-          startangle=90)
-axcis.axis('equal')
+sns.barplot(category_in_stores_df.reset_index(),
+            x="Kategori",
+            y="Procent",
+            ax=axcis,
+            errorbar=None,
+            palette="bright")
+plt.xticks(rotation=90)
+axcis.set_yticklabels([f'{x:.0f}%' for x in axcis.get_yticks()]) 
 
 st.pyplot(figcis)
