@@ -1,8 +1,8 @@
-import sqlite3
 import matplotlib.pyplot as plt
-import streamlit as st
 import pandas as pd
 import seaborn as sns
+import streamlit as st
+import sqlite3
 
 
 connection = sqlite3.connect("Köksglädje.db")
