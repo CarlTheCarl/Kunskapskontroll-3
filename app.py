@@ -14,7 +14,7 @@ JOIN Products on TransactionDetails.ProductID = Products.ProductID
 GROUP BY Kategori
 ORDER BY "Sammanlagd Försäljningsumma" DESC;'''
 
-best_in_category_query = '''SELECT CategoryName as Kategori, StoreName, CategorySalesSum as "Sammanlagd Försäljningsumma" FROM(
+best_in_category_query = '''SELECT CategoryName as Kategori, StoreName as Butik, CategorySalesSum as "Sammanlagd Försäljningsumma" FROM(
 SELECT Products.CategoryName, Stores.StoreName, SUM(PriceAtPurchase) as CategorySalesSum
 FROM TransactionDetails
 JOIN Products on TransactionDetails.ProductID = Products.ProductID
@@ -24,7 +24,7 @@ GROUP BY Products.CategoryName, Stores.StoreName
 ORDER BY CategorySalesSum DESC)
 GROUP BY CategoryName'''
 
-store_sales_query = '''SELECT Products.CategoryName as Kategori, Stores.StoreName as Butik, SUM(PriceAtPurchase) as "Sammanlagd Försäljningsumma"
+store_sales_query = '''SELECT Products.CategoryName as Kategori, Stores.StoreName as Butik, SUM(PriceAtPurchase) as "Sammanlagd Försäljningsumma", Transactions.TransactionDate as Datum
 FROM TransactionDetails
 JOIN Products on TransactionDetails.ProductID = Products.ProductID
 JOIN Transactions on TransactionDetails.TransactionID = Transactions.TransactionID
@@ -35,6 +35,9 @@ ORDER BY "Sammanlagd Försäljningsumma" DESC'''
 sales_total_df = pd.read_sql(sales_total_query, connection)
 best_in_category_df = pd.read_sql(best_in_category_query, connection)
 store_sales_df = pd.read_sql(store_sales_query, connection)
+print(store_sales_df)
+#store_sales_df['Datum'] = pd.to_datetime(store_sales_df['Datum'])
+
 
 st.title("Köksglädje")
 st.header("Analys av försäljning av köksprylar och föremål")
@@ -47,11 +50,12 @@ sns.barplot(sales_total_df.reset_index(),
             ax=axbarts, errorbar=None,
             palette="bright")
 plt.xticks(rotation=45)
+axbarts.grid(axis="y")
 st.pyplot(figbarts)
 
 #--------------------best in each category--------------------
 st.subheader("Högst säljande butik i varje kategori")
-st.dataframe(best_in_category_df)
+st.dataframe(best_in_category_df, column_order=["Butik", "Sammanlagd Försäljningsumma"])
 
 figbarbc, axbarbc = plt.subplots()
 sns.barplot(best_in_category_df.reset_index(),
@@ -59,6 +63,7 @@ sns.barplot(best_in_category_df.reset_index(),
             ax=axbarbc, errorbar=None,
             palette="bright")
 plt.xticks(rotation=45)
+axbarbc.grid(axis="y")
 st.pyplot(figbarbc)
 
 
@@ -69,6 +74,7 @@ figbarsic, axbarsic = plt.subplots(figsize=(12, 8))
 sns.barplot(store_sales_df.reset_index(),
             x="Kategori", y="Sammanlagd Försäljningsumma",
             hue="Butik", ax=axbarsic)
+axbarsic.grid(axis="y")
 st.pyplot(figbarsic)
 
 #--------------------selector for barchart--------------------
@@ -89,12 +95,23 @@ sns.barplot(stores_in_category_df.reset_index(),
             errorbar=None,
             palette="bright")
 axsic.set_xticklabels([f'{x:.0f}%' for x in axsic.get_xticks()]) 
+axsic.grid(axis="x")
 
 st.pyplot(figsic)
 
 #--------------------categori per store--------------------
 
 st.subheader("Kategoriprestanda per butik")
+
+store_sales_df['Procent'] = (store_sales_df['Sammanlagd Försäljningsumma'] / sum(store_sales_df['Sammanlagd Försäljningsumma'])) * 100
+
+figbarcis, axbarcis = plt.subplots(figsize=(12, 8))
+sns.barplot(store_sales_df.reset_index(),
+            x="Kategori", y="Procent",
+            hue="Butik", ax=axbarcis)
+axbarcis.set_yticklabels([f'{x:.0f}%' for x in axbarcis.get_yticks()]) 
+axbarcis.grid(axis="y")
+st.pyplot(figbarcis)
 
 #--------------------selector for barchart--------------------
 st_store_select = store_sales_df.drop_duplicates(subset=['Butik'])
@@ -108,6 +125,7 @@ category_in_stores_df['Procent'] = (category_in_stores_df['Sammanlagd Försäljn
 
 
 #--------------------barchart--------------------
+
 figcis, axcis = plt.subplots()
 sns.barplot(category_in_stores_df.reset_index(),
             x="Kategori",
@@ -117,5 +135,5 @@ sns.barplot(category_in_stores_df.reset_index(),
             palette="bright")
 plt.xticks(rotation=45)
 axcis.set_yticklabels([f'{x:.0f}%' for x in axcis.get_yticks()]) 
-
+axcis.grid(axis="y")
 st.pyplot(figcis)
