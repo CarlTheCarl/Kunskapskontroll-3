@@ -55,7 +55,7 @@ st.pyplot(figbarts)
 
 #--------------------best in each category--------------------
 st.subheader("Högst säljande butik i varje kategori")
-st.dataframe(best_in_category_df, column_order=["Butik", "Sammanlagd Försäljningsumma"])
+st.dataframe(best_in_category_df, column_order=["Butik", "Kategori", "Sammanlagd Försäljningsumma"])
 
 figbarbc, axbarbc = plt.subplots()
 sns.barplot(best_in_category_df.reset_index(),
@@ -100,7 +100,6 @@ axsic.grid(axis="x")
 st.pyplot(figsic)
 
 #--------------------categori per store--------------------
-
 st.subheader("Kategoriprestanda per butik")
 
 store_sales_df['Procent'] = (store_sales_df['Sammanlagd Försäljningsumma'] / sum(store_sales_df['Sammanlagd Försäljningsumma'])) * 100
@@ -111,6 +110,7 @@ sns.barplot(store_sales_df.reset_index(),
             hue="Butik", ax=axbarcis)
 axbarcis.set_yticklabels([f'{x:.0f}%' for x in axbarcis.get_yticks()]) 
 axbarcis.grid(axis="y")
+
 st.pyplot(figbarcis)
 
 #--------------------selector for barchart--------------------
@@ -125,7 +125,6 @@ category_in_stores_df['Procent'] = (category_in_stores_df['Sammanlagd Försäljn
 
 
 #--------------------barchart--------------------
-
 figcis, axcis = plt.subplots()
 sns.barplot(category_in_stores_df.reset_index(),
             x="Kategori",
@@ -136,4 +135,5 @@ sns.barplot(category_in_stores_df.reset_index(),
 plt.xticks(rotation=45)
 axcis.set_yticklabels([f'{x:.0f}%' for x in axcis.get_yticks()]) 
 axcis.grid(axis="y")
+
 st.pyplot(figcis)
