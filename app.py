@@ -24,19 +24,29 @@ GROUP BY Products.CategoryName, Stores.StoreName
 ORDER BY CategorySalesSum DESC)
 GROUP BY CategoryName'''
 
-store_sales_query = '''SELECT Products.CategoryName as Kategori, Stores.StoreName as Butik, SUM(PriceAtPurchase) as "Sammanlagd Försäljningsumma", Transactions.TransactionDate as Datum
+store_sales_query = '''SELECT Products.CategoryName as Kategori, Stores.StoreName as Butik, SUM(TotalPrice) as "Sammanlagd Försäljningsumma"
 FROM TransactionDetails
 JOIN Products on TransactionDetails.ProductID = Products.ProductID
 JOIN Transactions on TransactionDetails.TransactionID = Transactions.TransactionID
 JOIN Stores on Transactions.StoreID = Stores.StoreID
 GROUP BY Kategori, Butik
+'''
+
+store_sales_year_query = '''SELECT Products.CategoryName as Kategori, Stores.StoreName as Butik,
+SUM(PriceAtPurchase) as "Sammanlagd Försäljningsumma", Transactions.TransactionDate as Datum,
+Transactions.TransactionID as ID
+FROM TransactionDetails
+JOIN Products on TransactionDetails.ProductID = Products.ProductID
+JOIN Transactions on TransactionDetails.TransactionID = Transactions.TransactionID
+JOIN Stores on Transactions.StoreID = Stores.StoreID
+GROUP BY Datum, Butik
 ORDER BY "Sammanlagd Försäljningsumma" DESC'''
 
 sales_total_df = pd.read_sql(sales_total_query, connection)
 best_in_category_df = pd.read_sql(best_in_category_query, connection)
 store_sales_df = pd.read_sql(store_sales_query, connection)
-print(store_sales_df)
-#store_sales_df['Datum'] = pd.to_datetime(store_sales_df['Datum'])
+store_sales_year_df = pd.read_sql(store_sales_year_query, connection)
+store_sales_year_df['Datum'] = pd.to_datetime(store_sales_year_df['Datum'])
 
 
 st.title("Köksglädje")
@@ -137,3 +147,16 @@ axcis.set_yticklabels([f'{x:.0f}%' for x in axcis.get_yticks()])
 axcis.grid(axis="y")
 
 st.pyplot(figcis)
+
+#--------------------Store by Year--------------------
+st.subheader("Butiksprestande per år")
+
+store_sales_year_df['År'] = store_sales_year_df['Datum'].dt.year  
+store_sales_year_df = store_sales_year_df.groupby(['År','Butik'])['Sammanlagd Försäljningsumma'].sum()
+st.dataframe(store_sales_year_df)
+figbarsiy, axbarsiy = plt.subplots(figsize=(12, 8))
+sns.barplot(store_sales_year_df.reset_index(),
+            x="År", y="Sammanlagd Försäljningsumma",
+            hue="Butik", ax=axbarsiy, errorbar=None)
+axbarsiy.grid(axis="y")
+st.pyplot(figbarsiy)
